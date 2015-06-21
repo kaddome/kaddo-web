@@ -1,19 +1,23 @@
 'use strict';
 
+angular.module('shared-components', []);
 angular.module('hoozadApp', ['LocalStorageModule', 'tmh.dynamicLocale',
-    'ngResource', 'ui.router', 'ngCookies', 'pascalprecht.translate', 'ngCacheBuster', 'google.places'])
+    'ngResource', 'ui.router', 'ngCookies', 'pascalprecht.translate',
+    'ngCacheBuster', 'google.places', 'shared-components'])
 
     .run(function ($rootScope, $location, $http, $state, $translate, Auth, Principal, Language) {
         $rootScope.$on('$stateChangeStart', function (event, toState, toStateParams) {
             $rootScope.toState = toState;
             $rootScope.toStateParams = toStateParams;
+            $rootScope.baseUrl = '';
 
             $http.get('protected/authentication_check.gif', { ignoreErrors: true })
                 .error(function() {
                     if ($rootScope.toState.data.roles.length > 0) {
                         Auth.logout();
-                        $state.go('login');
+
                     }
+                     $state.go('login');
                 });
 
             if (Principal.isIdentityResolved()) {
@@ -83,3 +87,10 @@ angular.module('hoozadApp', ['LocalStorageModule', 'tmh.dynamicLocale',
         tmhDynamicLocaleProvider.localeLocationPattern('bower_components/angular-i18n/angular-locale_{{locale}}.js');
         tmhDynamicLocaleProvider.useCookieStorage('NG_TRANSLATE_LANG_KEY');
     });
+
+window.onload = function(e) {
+    if(window.opener){
+        window.opener.postMessage('reload', '*');
+        window.close();
+    }
+};
